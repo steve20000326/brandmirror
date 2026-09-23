@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id                 String  @id @default(cuid())
+  name               String
+  industry           String
+  websiteUrl         String?
+  officialStoreUrl   String?
+  description        String?
+  coreProducts       String?
+  targetAudience     String?
+  priceTier          String?
+  desiredPositioning String?
+  desiredKeywords    String?
+  status             String  @default("draft")
+
+  // Reserved for future auth / billing
+  ownerUserId String?
+  plan        String?
+
+  competitors   Competitor[]
+  questions     Question[]
+  scanJobs      ScanJob[]
+  brandProfiles BrandProfile[]
+  prescriptions Prescription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Competitor {
+  id         String  @id @default(cuid())
+  brandId    String
+  name       String
+  websiteUrl String?
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Question {
+  id             String  @id @default(cuid())
+  brandId        String
+  text           String
+  questionType   String?
+  persona        String?
+  scenario       String?
+  purchaseIntent String?
+  brandPresent   Boolean @default(false)
+  source         String  @default("generated")
+  enabled        Boolean @default(true)
+
+  brand        Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  observations Observation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ScanJob {
+  id             String @id @default(cuid())
+  brandId        String
+  status         String @default("pending")
+  totalTasks     Int    @default(0)
+  completedTasks Int    @default(0)
+  failedTasks    Int    @default(0)
+
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  brand        Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  observations Observation[]
+  modelUsage   ModelUsage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Observation {
+  id         String @id @default(cuid())
+  scanJobId  String
+  questionId String
+
+  provider String
+  model    String
+
+  rawResponse String?
+
+  brandMentioned Boolean?
+  brandRank      Int?
+  recommended    Boolean?
+
+  competitorsJson String?
+  attributesJson  String?
+  analysisJson    String?
+
+  status       String  @default("pending")
+  errorMessage String?
+
+  scanJob  ScanJob  @relation(fields: [scanJobId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BrandProfile {
+  id                  String  @id @default(cuid())
+  brandId             String
+  scanJobId           String?
+  aiBrandScore        Float?
+  awarenessScore      Float?
+  recommendationScore Float?
+  discoveryScore      Float?
+  accuracyScore       Float?
+  competitorScore     Float?
+  profileJson         String?
+  summary             String?
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Prescription {
+  id        String  @id @default(cuid())
+  brandId   String
+  scanJobId String?
+  priority  Int
+  title     String
+  evidence  String?
+  diagnosis String?
+  action    String?
+  status    String  @default("active")
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ModelUsage {
+  id               String  @id @default(cuid())
+  scanJobId        String?
+  provider         String
+  model            String
+  promptTokens     Int     @default(0)
+  completionTokens Int     @default(0)
+  totalTokens      Int     @default(0)
+  estimatedCost    Float   @default(0)
+
+  scanJob ScanJob? @relation(fields: [scanJobId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
