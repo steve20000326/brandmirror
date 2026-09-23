@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { GeneratePlanButton } from "@/components/GeneratePlanButton";
 import { PageHeader } from "@/components/PageHeader";
+import { isFashionIndustry } from "@/domain/industry-packs";
 import { brandStatusLabel } from "@/lib/utils";
-import { getBrandById } from "@/server/brands/queries";
+import { brandHasQuestionPlan, getBrandById } from "@/server/brands/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +30,9 @@ export default async function BrandDetailPage({ params }: PageProps) {
   if (!brand) {
     notFound();
   }
+
+  const hasPlan = await brandHasQuestionPlan(brand.id);
+  const industrySupported = isFashionIndustry(brand.industry);
 
   return (
     <div>
@@ -86,15 +91,12 @@ export default async function BrandDetailPage({ params }: PageProps) {
         </section>
       </div>
 
-      <div className="mt-10 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-8">
-        <button
-          type="button"
-          disabled
-          className="inline-flex h-11 cursor-not-allowed items-center rounded-lg bg-slate-300 px-5 text-sm font-medium text-slate-600"
-        >
-          生成AI测试方案
-        </button>
-        <span className="text-sm text-slate-500">Day 2开放</span>
+      <div className="mt-10 border-t border-slate-200 pt-8">
+        <GeneratePlanButton
+          brandId={brand.id}
+          hasPlan={hasPlan}
+          industrySupported={industrySupported}
+        />
       </div>
     </div>
   );

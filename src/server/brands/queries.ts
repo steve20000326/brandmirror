@@ -1,3 +1,4 @@
+import { FASHION_PACK_VERSION } from "@/domain/industry-packs/fashion";
 import { prisma } from "@/lib/prisma";
 import type { BrandDetail, BrandListItem } from "@/types/brand";
 
@@ -46,4 +47,16 @@ export async function getBrandById(id: string): Promise<BrandDetail | null> {
     createdAt: brand.createdAt,
     competitors: brand.competitors,
   };
+}
+
+/** Whether this brand already has a complete Fashion v0.1 plan. */
+export async function brandHasQuestionPlan(brandId: string): Promise<boolean> {
+  const count = await prisma.question.count({
+    where: {
+      brandId,
+      source: FASHION_PACK_VERSION,
+      enabled: true,
+    },
+  });
+  return count >= 30;
 }

@@ -1,0 +1,26 @@
+# Day 2 Acceptance Checklist
+
+- [x] Fashion Industry Pack已建立
+- [x] Fashion Pack有明确版本号
+- [x] 女装标准母题不少于120条
+- [x] 五类母题各不少于24条
+- [x] 澜序女装成功生成30题
+- [x] 品牌认知题=5
+- [x] 品类发现题=8
+- [x] 人群场景题=7
+- [x] 竞品比较题=5
+- [x] 购买决策题=5
+- [x] 含品牌题=12
+- [x] 无品牌题=18
+- [x] 30题不存在重复
+- [x] 不存在未解析placeholder
+- [x] 同一品牌重复生成结果稳定一致
+- [x] Question表成功保存30条
+- [x] 重复点击不会生成60条
+- [x] /brands/[id]/questions页面正常
+- [x] 30题按类别正确展示
+- [x] 测试方案页明确展示18/30无品牌题
+- [x] 非女装行业不会误用Fashion Pack
+- [x] npm test全部通过
+- [x] npm run build成功
+- [x] ESLint无阻断错误
