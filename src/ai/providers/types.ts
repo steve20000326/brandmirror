@@ -1,26 +1,44 @@
+export type ProviderId = "deepseek" | "tencent-hy" | "qwen";
+
 export type ModelMessage = {
   role: "system" | "user" | "assistant";
   content: string;
 };
 
-export type ModelResponse = {
-  provider: string;
+export interface ModelUsageData {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+}
+
+export interface ModelResponse {
+  provider: ProviderId;
   model: string;
   content: string;
-  usage?: {
-    promptTokens?: number;
-    completionTokens?: number;
-    totalTokens?: number;
-  };
+  usage?: ModelUsageData;
+  responseId?: string;
+  latencyMs?: number;
+}
+
+export interface ModelRequest {
+  messages: ModelMessage[];
+  maxTokens?: number;
+  temperature?: number;
+}
+
+export type ConnectionTestResult = {
+  ok: boolean;
+  latencyMs: number;
+  error?: string;
 };
 
-/** Shared interface — all vendors must implement this. */
 export interface ModelProvider {
-  readonly provider: string;
+  readonly provider: ProviderId;
+  readonly model: string;
 
-  chat(params: {
-    model?: string;
-    messages: ModelMessage[];
-    temperature?: number;
-  }): Promise<ModelResponse>;
+  isConfigured(): boolean;
+
+  chat(request: ModelRequest): Promise<ModelResponse>;
+
+  testConnection(): Promise<ConnectionTestResult>;
 }

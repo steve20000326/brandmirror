@@ -1,4 +1,4 @@
-import { getTencentHyConfig, isTencentHyConfigured } from "@/lib/env";
+import { getQwenConfig, isQwenConfigured } from "@/lib/env";
 import { CONSUMER_BASELINE_SYSTEM_PROMPT } from "@/ai/prompts/consumer-baseline";
 import { ProviderError } from "./errors";
 import { chatCompletions } from "./openai-compatible";
@@ -10,28 +10,35 @@ import type {
   ProviderId,
 } from "./types";
 
-/** Tencent TokenHub Hy3 — display name: Tencent HY */
-export class TencentHyProvider implements ModelProvider {
-  readonly provider: ProviderId = "tencent-hy";
+export class QwenProvider implements ModelProvider {
+  readonly provider: ProviderId = "qwen";
 
   get model(): string {
-    return getTencentHyConfig().model;
+    return getQwenConfig().model;
   }
 
   isConfigured(): boolean {
-    return isTencentHyConfigured();
+    return isQwenConfigured();
   }
 
   async chat(request: ModelRequest): Promise<ModelResponse> {
     if (!this.isConfigured()) {
       throw new ProviderError({
-        message: "Tencent HY尚未配置",
+        message: "Qwen尚未配置",
         code: "config",
         retryable: false,
       });
     }
 
-    const cfg = getTencentHyConfig();
+    const cfg = getQwenConfig();
+    if (!cfg.baseURL) {
+      throw new ProviderError({
+        message: "Qwen尚未配置",
+        code: "config",
+        retryable: false,
+      });
+    }
+
     const result = await chatCompletions({
       baseURL: cfg.baseURL,
       apiKey: cfg.apiKey,
@@ -40,7 +47,7 @@ export class TencentHyProvider implements ModelProvider {
       temperature: request.temperature ?? 0.3,
       maxTokens: request.maxTokens ?? 800,
       extraBody: {
-        thinking: { type: "disabled" },
+        enable_thinking: false,
       },
     });
 
@@ -75,6 +82,3 @@ export class TencentHyProvider implements ModelProvider {
     }
   }
 }
-
-/** Back-compat alias for Day 1 filename hunyuan.ts */
-export { TencentHyProvider as HunyuanProvider };

@@ -11,7 +11,8 @@ BrandMirror 的模型调用必须走统一接口，避免业务层绑定某一�
 5. Consumer Surface 测试未来单独处理。
 6. 每一次正式模型调用必须记录 token usage。
 
-## Day 1 状态
+## Day 3 状态
 
-- 已定义 `ModelProvider` 接口
-- DeepSeek / Hunyuan 仅为占位 Stub，**不会**真实调用 API
+- DeepSeek Flash / Tencent Hy3 / Qwen3.8 Flash 通过 OpenAI-compatible `fetch` 调用
+- 统一关闭 Thinking 与联网搜索
+- 扫描结果标记为 **模型基线扫描（Model API）**，不是消费者 App 真实回答

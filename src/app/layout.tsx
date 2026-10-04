@@ -39,6 +39,9 @@ export default function RootLayout({
               <Link href="/brands" className="hover:text-slate-900">
                 品牌列表
               </Link>
+              <Link href="/admin/models" className="hover:text-slate-900">
+                模型连接
+              </Link>
               <Link
                 href="/brands/new"
                 className="rounded-md bg-slate-900 px-3 py-1.5 text-white hover:bg-slate-800"
@@ -52,7 +55,7 @@ export default function RootLayout({
           {children}
         </main>
         <footer className="border-t border-slate-200/80 py-6 text-center text-xs text-slate-500">
-          BrandMirror · MVP Day 1
+          BrandMirror · MVP Day 3
         </footer>
       </body>
     </html>

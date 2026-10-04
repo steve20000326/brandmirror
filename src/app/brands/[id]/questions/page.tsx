@@ -164,14 +164,12 @@ export default async function BrandQuestionsPage({ params }: PageProps) {
       </div>
 
       <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-8">
-        <button
-          type="button"
-          disabled
-          className="inline-flex h-11 cursor-not-allowed items-center rounded-lg bg-slate-300 px-5 text-sm font-medium text-slate-600"
+        <Link
+          href={`/brands/${brand.id}/scan`}
+          className="inline-flex h-11 items-center rounded-lg bg-slate-900 px-5 text-sm font-medium text-white hover:bg-slate-800"
         >
-          开始AI扫描
-        </button>
-        <span className="text-sm text-slate-500">Day 3开放</span>
+          开始模型基线扫描
+        </Link>
       </div>
     </div>
   );

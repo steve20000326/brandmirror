@@ -1,0 +1,33 @@
+# Day 3 Acceptance Checklist
+
+- [x] Day2两道购买题已经修正
+- [x] Question仍然保持30条
+- [x] DeepSeek Provider真实接通
+- [x] Tencent TokenHub Hy3真实接通
+- [x] Qwen3.8 Flash真实接通
+- [x] 3个Provider健康检查全部成功
+- [x] 三家统一关闭Thinking
+- [x] 三家统一关闭Web Search
+- [x] Model Benchmark免责声明已显示
+- [x] Observation增加scan metadata字段
+- [x] ScanJob可成功创建
+- [x] 每次扫描生成90条Observation
+- [x] Chunk Processing已经实现
+- [x] 单请求不会直接执行90次模型调用
+- [x] 最大并发受到限制
+- [x] API请求存在Timeout
+- [x] 429/5xx能够重试
+- [x] 401/403不会盲目重试
+- [x] 一个Provider失败不会拖垮整批任务
+- [x] rawResponse完整保存
+- [x] Token usage成功保存
+- [x] 搜索状态固定为false
+- [x] surfaceType固定为model_api
+- [x] promptVersion正确保存
+- [x] 扫描进度页正常
+- [x] 浏览器刷新后可以继续查看任务
+- [x] 扫描结果页可以查看三个模型原始回答
+- [x] 澜序女装成功完成90次Observation
+- [x] npm test全部成功
+- [x] npm run build成功
+- [x] ESLint无阻断错误
