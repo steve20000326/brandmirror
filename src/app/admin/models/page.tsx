@@ -7,8 +7,8 @@ export default function AdminModelsPage() {
   return (
     <div>
       <PageHeader
-        title="模型连接"
-        description="检查 DeepSeek、Tencent HY、Qwen 是否已配置并可连通。本次为模型 API 基线，不等同于消费者 App。"
+        title="Models"
+        description="检查 DeepSeek、Tencent HY、Qwen 是否已配置并可连通。不显示 API Key。"
       />
       <ModelHealthPanel />
     </div>

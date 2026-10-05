@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { listScanProviders } from "@/ai/providers";
+import { recordModelUsage } from "@/ai/usage/recorder";
 import { PROVIDER_LABELS, PROVIDER_MODEL_LABELS } from "@/server/scans/types";
 import type { ProviderId } from "@/ai/providers/types";
 
@@ -36,6 +37,16 @@ export async function POST(request: Request) {
   }
 
   const result = await target.testConnection();
+  if (result.ok) {
+    await recordModelUsage({
+      provider: target.provider,
+      model: target.model,
+      purpose: "connection_test",
+      promptTokens: 0,
+      completionTokens: 0,
+      totalTokens: 0,
+    });
+  }
   return NextResponse.json({
     ok: result.ok,
     latencyMs: result.latencyMs,

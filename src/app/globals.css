@@ -23,3 +23,26 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), "PingFang SC", "Noto Sans SC", sans-serif;
 }
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  .site-header,
+  .print-hidden,
+  button,
+  nav {
+    display: none !important;
+  }
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  .report-doc section {
+    break-inside: avoid;
+  }
+  .report-cover {
+    break-after: avoid;
+  }
+}

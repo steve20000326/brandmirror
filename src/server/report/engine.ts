@@ -8,6 +8,8 @@ import { buildBrandPortrait } from "@/ai/profile/builder";
 import { runPrescriptionEngine } from "@/ai/prescriptions/engine";
 import { PRESCRIPTION_ENGINE_VERSION } from "@/ai/prescriptions/types";
 import { prisma } from "@/lib/prisma";
+import { wrapChatWithUsage } from "@/ai/usage/recorder";
+import { getAnalyzerConfig } from "@/lib/env";
 import { persistBrandProfile } from "@/server/analysis/runner";
 import { computeGeoMetrics } from "@/server/analysis/metrics";
 
@@ -49,7 +51,24 @@ export async function generateScanReport(scanJobId: string, chat?: AnalyzerChat)
 
   const absent = observations.filter((o) => !o.brandPresent);
   const present = observations.filter((o) => o.brandPresent);
-  const llm = chat ?? (process.env.DEEPSEEK_API_KEY ? getAnalyzerClient() : undefined);
+  const cfg = getAnalyzerConfig();
+  const rawLlm = chat ?? (process.env.DEEPSEEK_API_KEY ? getAnalyzerClient() : undefined);
+  const diagnosisChat = rawLlm
+    ? wrapChatWithUsage(rawLlm, {
+        scanJobId,
+        purpose: "diagnosis",
+        fallbackProvider: cfg.provider,
+        fallbackModel: cfg.model,
+      })
+    : undefined;
+  const prescriptionChat = rawLlm
+    ? wrapChatWithUsage(rawLlm, {
+        scanJobId,
+        purpose: "prescription",
+        fallbackProvider: cfg.provider,
+        fallbackModel: cfg.model,
+      })
+    : undefined;
 
   const diagnoses = await runDiagnosisEngine(
     {
@@ -64,7 +83,7 @@ export async function generateScanReport(scanJobId: string, chat?: AnalyzerChat)
       desiredPositioning: job.brand.desiredPositioning,
       desiredPriceTier: job.brand.priceTier,
     },
-    llm,
+    diagnosisChat,
   );
 
   const prescriptions = await runPrescriptionEngine(
@@ -79,7 +98,7 @@ export async function generateScanReport(scanJobId: string, chat?: AnalyzerChat)
       portrait,
       diagnoses,
     },
-    llm,
+    prescriptionChat,
   );
 
   const shownDiagnoses = topDiagnoses(diagnoses, 5);

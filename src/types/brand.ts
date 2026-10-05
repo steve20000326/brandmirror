@@ -35,6 +35,7 @@ export type BrandDetail = {
   desiredPositioning: string | null;
   desiredKeywords: string | null;
   status: string;
+  isCalibration: boolean;
   createdAt: Date;
   competitors: Array<{
     id: string;

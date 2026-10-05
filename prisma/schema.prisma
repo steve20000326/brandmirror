@@ -20,6 +20,7 @@ model Brand {
   desiredPositioning String?
   desiredKeywords    String?
   aliasesJson        String?
+  isCalibration      Boolean @default(false)
   status             String  @default("draft")
 
   // Reserved for future auth / billing
@@ -203,18 +204,31 @@ model Prescription {
 }
 
 model ModelUsage {
-  id               String  @id @default(cuid())
+  id               String   @id @default(cuid())
   scanJobId        String?
   provider         String
   model            String
-  promptTokens     Int     @default(0)
-  completionTokens Int     @default(0)
-  totalTokens      Int     @default(0)
-  estimatedCost    Float   @default(0)
+  purpose          String?
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  totalTokens      Int      @default(0)
+  estimatedCost    Float    @default(0)
+  inputCost        Float?
+  outputCost       Float?
+  totalCost        Float?
   currency         String?
   pricingVersion   String?
 
-  scanJob ScanJob? @relation(fields: [scanJobId], references: [id], onDelete: SetNull)
+  scanJob ScanJob? @relation(fields: [scanJobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model ReportShare {
+  id         String   @id @default(cuid())
+  scanJobId  String   @unique
+  shareToken String   @unique
+  enabled    Boolean  @default(true)
 
   createdAt DateTime @default(now())
 }

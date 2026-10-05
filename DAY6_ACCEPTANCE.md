@@ -1,0 +1,46 @@
+# Day 6 Acceptance
+
+- [x] 客户报告封面完成
+- [x] 一句话结论完成
+- [x] BrandMirror Stage完成
+- [x] 五项成绩单客户化
+- [x] AI认知风险独立显示
+- [x] AI眼中的你完成
+- [x] 品牌希望VS AI实际完成
+- [x] Top Diagnosis客户化
+- [x] GEO Prescription客户化
+- [x] Evidence/Diagnosis/Action均正常显示
+- [x] 模型差异表完成
+- [x] 测试方法说明完成
+- [x] 报告免责声明完成
+- [x] Calibration提示正常
+- [x] ReportShare模型完成
+- [x] 安全shareToken完成
+- [x] /r/[token]只读报告完成
+- [x] 分享开关完成
+- [x] Disabled链接失效
+- [x] 打印样式完成
+- [x] Admin Overview完成
+- [x] Admin Brands完成
+- [x] Admin Scans完成
+- [x] Admin Models完成
+- [x] Admin Usage完成
+- [x] ModelUsage支持purpose
+- [x] 所有Day6新增模型调用均记录Usage
+- [x] Pricing Config集中管理
+- [x] DeepSeek pricing支持版本
+- [x] Qwen pricing支持版本
+- [x] Tencent未确认价格不造数
+- [x] 单报告Usage可计算
+- [x] 单报告已知成本可计算
+- [x] 多币种不擅自换算
+- [x] Admin密码保护完成
+- [x] Admin Secret不进入客户端
+- [x] isCalibration完成
+- [x] 首页客户化完成
+- [x] Report View Model完成
+- [x] 公开报告不泄露内部字段
+- [x] 相同报告重复打开内容一致
+- [x] npm test全部通过
+- [x] npm run build成功
+- [x] ESLint无阻断错误

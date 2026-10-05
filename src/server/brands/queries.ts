@@ -44,6 +44,7 @@ export async function getBrandById(id: string): Promise<BrandDetail | null> {
     desiredPositioning: brand.desiredPositioning,
     desiredKeywords: brand.desiredKeywords,
     status: brand.status,
+    isCalibration: brand.isCalibration,
     createdAt: brand.createdAt,
     competitors: brand.competitors,
   };

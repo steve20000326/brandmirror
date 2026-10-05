@@ -1,13 +1,26 @@
-import { ANALYZER_BATCH_SIZE, analyzeObservationBatch } from "@/ai/analyzers/observation-analyzer";
+import { ANALYZER_BATCH_SIZE, analyzeObservationBatch, getAnalyzerClient } from "@/ai/analyzers/observation-analyzer";
 import type { AnalyzerChat } from "@/ai/analyzers/observation-analyzer";
 import { detectBrandMention } from "@/ai/analyzers/exact-match";
 import { looksLikeUnsupportedSpecifics } from "@/ai/analyzers/finalize";
 import { ANALYZER_PROMPT_VERSION } from "@/ai/analyzers/types";
+import { wrapChatWithUsage } from "@/ai/usage/recorder";
+import { getAnalyzerConfig } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import { computeGeoMetrics, type MetricRow } from "./metrics";
 import { refreshAnalysisJobCounts } from "./queries";
 import { ANALYSIS_ANALYZER_CONCURRENCY, ANALYSIS_PROCESS_LIMIT, toBrandDossier } from "./types";
 import type { AnalyzerResult } from "@/ai/analyzers/types";
+
+function trackedAnalyzer(scanJobId: string, chat?: AnalyzerChat): AnalyzerChat {
+  const cfg = getAnalyzerConfig();
+  const base = chat ?? getAnalyzerClient();
+  return wrapChatWithUsage(base, {
+    scanJobId,
+    purpose: "analysis",
+    fallbackProvider: cfg.provider,
+    fallbackModel: cfg.model,
+  });
+}
 
 async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {
   const queue = [...items];
@@ -236,7 +249,11 @@ export async function processAnalysisBatch(
         brandPresent: obs.question.brandPresent,
         response: obs.rawResponse ?? "",
       }));
-      const analyzed = await analyzeObservationBatch(inputs, dossier, chat);
+      const analyzed = await analyzeObservationBatch(
+        inputs,
+        dossier,
+        trackedAnalyzer(scanJobId, chat),
+      );
       for (const obs of group) {
         const result = analyzed.get(obs.id);
         if (!result) {
@@ -353,7 +370,11 @@ export async function reanalyzeObservations(
         brandPresent: obs.question.brandPresent,
         response: obs.rawResponse ?? "",
       }));
-      const analyzed = await analyzeObservationBatch(inputs, dossier, chat);
+      const analyzed = await analyzeObservationBatch(
+        inputs,
+        dossier,
+        trackedAnalyzer(scanJobId, chat),
+      );
       for (const obs of claimed) {
         const result = analyzed.get(obs.id);
         if (!result) {

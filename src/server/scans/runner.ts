@@ -6,6 +6,7 @@ import { getProvider } from "@/ai/providers";
 import { publicErrorMessage, shouldRetry } from "@/ai/providers/errors";
 import type { ModelProvider, ProviderId } from "@/ai/providers/types";
 import { prisma } from "@/lib/prisma";
+import { calculateTokenCost } from "@/ai/pricing/calculator";
 import { SCAN_BATCH_SIZE, SCAN_CONCURRENCY, SCAN_MAX_ATTEMPTS } from "./types";
 
 const RETRY_DELAYS_MS = [1000, 3000];
@@ -94,6 +95,14 @@ async function processOneObservation(
         maxTokens: 800,
       });
 
+      const cost = calculateTokenCost({
+        provider: result.provider,
+        model: result.model,
+        promptTokens: result.usage?.promptTokens ?? 0,
+        completionTokens: result.usage?.completionTokens ?? 0,
+      });
+
+      const persistUsage = !process.env.VITEST;
       await prisma.$transaction([
         prisma.observation.update({
           where: { id: observation.id },
@@ -108,7 +117,6 @@ async function processOneObservation(
             surfaceType: "model_api",
             searchEnabled: false,
             model: result.model,
-            // Day 3: analyzer fields stay null
             brandMentioned: null,
             brandRank: null,
             recommended: null,
@@ -117,18 +125,27 @@ async function processOneObservation(
             analysisJson: null,
           },
         }),
-        prisma.modelUsage.create({
-          data: {
-            scanJobId: observation.scanJobId,
-            provider: result.provider,
-            model: result.model,
-            promptTokens: result.usage?.promptTokens ?? 0,
-            completionTokens: result.usage?.completionTokens ?? 0,
-            totalTokens: result.usage?.totalTokens ?? 0,
-            estimatedCost: 0,
-            pricingVersion: "not-calculated",
-          },
-        }),
+        ...(persistUsage
+          ? [
+              prisma.modelUsage.create({
+                data: {
+                  scanJobId: observation.scanJobId,
+                  provider: result.provider,
+                  model: result.model,
+                  purpose: "scan",
+                  promptTokens: result.usage?.promptTokens ?? 0,
+                  completionTokens: result.usage?.completionTokens ?? 0,
+                  totalTokens: result.usage?.totalTokens ?? 0,
+                  estimatedCost: cost.totalCost ?? 0,
+                  inputCost: cost.inputCost,
+                  outputCost: cost.outputCost,
+                  totalCost: cost.totalCost,
+                  currency: cost.currency,
+                  pricingVersion: cost.pricingVersion,
+                },
+              }),
+            ]
+          : []),
       ]);
       return;
     } catch (err) {
