@@ -7,6 +7,7 @@ import { FASHION_PACK_VERSION } from "@/domain/industry-packs/fashion";
 import { PROVIDER_LABELS } from "@/server/scans/types";
 import { getBrandById } from "@/server/brands/queries";
 import { getScanJobById, listScanObservations, listScanUsage } from "@/server/scans/queries";
+import { AnalysisController } from "@/components/AnalysisController";
 
 export const dynamic = "force-dynamic";
 
@@ -136,6 +137,15 @@ export default async function ScanResultPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      <AnalysisController
+        brandId={brand.id}
+        scanJobId={job.id}
+        scanStatus={job.status}
+        initialAnalysisStatus={job.analysisStatus}
+        initialAnalyzed={job.analyzedTasks}
+        totalTasks={job.totalTasks}
+      />
 
       <div className="space-y-4">
         {questions.map((q, index) => (

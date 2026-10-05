@@ -1,0 +1,33 @@
+# Day 4 Acceptance Checklist
+
+- [x] Observation Analysis字段完成Migration
+- [x] BrandProfile增加hallucinationRiskScore
+- [x] ScanJob可以记录Analysis进度
+- [x] Analyzer版本号已建立
+- [x] Analyzer使用统一模型
+- [x] Analyzer禁止使用外部品牌知识
+- [x] Exact brand match由代码完成
+- [x] 竞品Exact Match由代码完成
+- [x] Analyzer可以输出合法JSON
+- [x] Analyzer JSON使用Zod校验
+- [x] 分析使用Batch而不是90次单独调用
+- [x] 单个Batch失败不会拖垮整个任务
+- [x] 90条Observation全部得到Analysis状态
+- [x] recognitionStatus正确区分unknown和unsupported
+- [x] Discovery Score由程序计算
+- [x] Recommendation Score由程序计算
+- [x] Awareness Score由程序计算
+- [x] Alignment Score由程序计算
+- [x] Competitor Score由程序计算
+- [x] AI Brand Score权重正确
+- [x] Hallucination Risk独立计算
+- [x] Hallucination Risk不参与Brand Score
+- [x] providerMetricsJson生成成功
+- [x] BrandProfile成功保存
+- [x] 分析结果页正常
+- [x] 三模型对比表正常
+- [x] 原始rawResponse完全未修改
+- [x] 分析重复执行不会重复创建无效Profile
+- [x] npm test全部通过
+- [x] npm run build成功
+- [x] ESLint无阻断错误

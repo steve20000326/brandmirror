@@ -77,6 +77,13 @@ model ScanJob {
   startedAt   DateTime?
   completedAt DateTime?
 
+  analysisStatus      String    @default("not_started")
+  analyzedTasks       Int       @default(0)
+  analysisFailedTasks Int       @default(0)
+  analysisStartedAt   DateTime?
+  analysisCompletedAt DateTime?
+  analyzerVersion     String?
+
   brand        Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
   observations Observation[]
   modelUsage   ModelUsage[]
@@ -113,6 +120,12 @@ model Observation {
   attemptCount  Int     @default(0)
   responseId    String?
   promptVersion String  @default("consumer-baseline-v0.1")
+  finishReason  String?
+
+  analysisStatus       String  @default("not_started")
+  analysisAttemptCount Int     @default(0)
+  analysisErrorMessage String?
+  analyzerVersion      String?
 
   scanJob  ScanJob  @relation(fields: [scanJobId], references: [id], onDelete: Cascade)
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -130,9 +143,11 @@ model BrandProfile {
   recommendationScore Float?
   discoveryScore      Float?
   accuracyScore       Float?
-  competitorScore     Float?
-  profileJson         String?
-  summary             String?
+  competitorScore        Float?
+  hallucinationRiskScore Float?
+  providerMetricsJson    String?
+  profileJson            String?
+  summary                String?
 
   brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
 

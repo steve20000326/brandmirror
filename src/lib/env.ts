@@ -54,3 +54,11 @@ export function getQwenConfig() {
     model: read("QWEN_MODEL") || "qwen3.8-flash",
   };
 }
+
+export function getAnalyzerConfig() {
+  return {
+    provider: read("ANALYZER_PROVIDER") || "deepseek",
+    model: read("ANALYZER_MODEL") || "deepseek-flash",
+    promptVersion: read("ANALYZER_PROMPT_VERSION") || "observation-analyzer-v0.1",
+  };
+}
