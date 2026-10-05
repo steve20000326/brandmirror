@@ -85,12 +85,20 @@ export function AnalysisController({
 
       <div className="mt-4 flex flex-wrap gap-3">
         {done && !busy ? (
-          <Link
-            href={`/brands/${brandId}/scans/${scanJobId}/analysis`}
-            className="inline-flex h-11 items-center rounded-lg bg-slate-900 px-5 text-sm font-medium text-white hover:bg-slate-800"
-          >
-            查看分析结果
-          </Link>
+          <>
+            <Link
+              href={`/brands/${brandId}/scans/${scanJobId}/analysis`}
+              className="inline-flex h-11 items-center rounded-lg bg-slate-900 px-5 text-sm font-medium text-white hover:bg-slate-800"
+            >
+              查看分析结果
+            </Link>
+            <Link
+              href={`/brands/${brandId}/reports/${scanJobId}`}
+              className="inline-flex h-11 items-center rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            >
+              打开完整报告
+            </Link>
+          </>
         ) : null}
         {canStart && !done && !busy ? (
           <button

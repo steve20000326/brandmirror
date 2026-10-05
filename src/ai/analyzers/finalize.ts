@@ -37,7 +37,11 @@ export function finalizeAnalyzerResult(params: {
   dossier: BrandDossier;
 }): AnalyzerResult {
   const { llm, rawResponse, brandPresent, dossier } = params;
-  const brandMentioned = detectBrandMention(rawResponse, dossier.name);
+  const brandMentioned = detectBrandMention(
+    rawResponse,
+    dossier.name,
+    dossier.aliasesJson,
+  );
   const competitorHits = detectCompetitorMentions(rawResponse, dossier.competitors);
 
   let recommendationStatus: RecommendationStatus = llm.recommendationStatus;
@@ -70,6 +74,12 @@ export function finalizeAnalyzerResult(params: {
   let recognitionStatus = llm.recognitionStatus;
   if (!brandPresent) {
     recognitionStatus = null;
+  } else if (
+    brandMentioned &&
+    (recognitionStatus === "unknown" || recognitionStatus === null) &&
+    looksLikeUnsupportedSpecifics(rawResponse, dossier)
+  ) {
+    recognitionStatus = "unsupported_specifics";
   }
 
   return {
@@ -85,6 +95,24 @@ export function finalizeAnalyzerResult(params: {
     unsupportedClaims: llm.unsupportedClaims,
     confidence: llm.confidence,
   };
+}
+
+export function looksLikeUnsupportedSpecifics(rawResponse: string, dossier: BrandDossier): boolean {
+  const known = [
+    dossier.name,
+    dossier.coreProducts,
+    dossier.priceTier,
+    dossier.targetAudience,
+    dossier.desiredPositioning,
+    dossier.desiredKeywords,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const prices = rawResponse.match(/\d{3,6}\s*元/g) ?? [];
+  const years = rawResponse.match(/(?:19|20)\d{2}\s*年/g) ?? [];
+  const extraPrice = prices.some((p) => !known.includes(p.replace(/\s/g, "")));
+  const extraYear = years.some((y) => !known.includes(y.replace(/\s/g, "")));
+  return extraPrice || extraYear;
 }
 
 export { detectBrandMention, detectCompetitorMentions };

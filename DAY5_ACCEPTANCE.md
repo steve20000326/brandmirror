@@ -1,0 +1,39 @@
+# Day 5 Acceptance
+
+- [x] Brand Alias Matcher完成
+- [x] 澜序简称可以被识别
+- [x] 受影响Day4 Analysis重新分析
+- [x] BrandProfile重新计算
+- [x] AI Brand Profile Engine完成
+- [x] Profile不使用外部知识
+- [x] Profile包含证据数量
+- [x] 无数据时显示暂无稳定认知
+- [x] Diagnosis Engine完成
+- [x] Diagnosis同时包含规则层和LLM解释层
+- [x] LOW_AWARENESS可正确触发
+- [x] LOW_DISCOVERY可正确触发
+- [x] LOW_RECOMMENDATION可正确触发
+- [x] COMPETITOR_DOMINATED可正确触发
+- [x] HALLUCINATION_RISK可正确触发
+- [x] Diagnosis均带Evidence
+- [x] Prescription Engine完成
+- [x] Prescription数量5-10
+- [x] 每条均包含Evidence
+- [x] 每条均包含Diagnosis
+- [x] 每条均包含Action
+- [x] 不生成空泛GEO建议
+- [x] 不承诺模型排名或推荐结果
+- [x] Prescription按Priority排序
+- [x] Web Report页面完成
+- [x] 页面显示AI眼中的品牌
+- [x] 页面显示品牌希望VS AI实际
+- [x] 页面显示Top Diagnoses
+- [x] 页面显示Top GEO Actions
+- [x] 页面显示模型差异
+- [x] 页面显示测试时间
+- [x] 页面明确Model API基线
+- [x] Calibration Brand提示存在
+- [x] 重复运行保持幂等
+- [x] npm test全部通过
+- [x] npm run build成功
+- [x] ESLint无阻断错误

@@ -28,6 +28,7 @@ export function toBrandDossier(brand: {
   priceTier: string | null;
   desiredPositioning: string | null;
   desiredKeywords: string | null;
+  aliasesJson?: string | null;
   competitors: Array<{ name: string }>;
 }): BrandDossier {
   return {
@@ -39,6 +40,7 @@ export function toBrandDossier(brand: {
     desiredPositioning: brand.desiredPositioning,
     desiredKeywords: brand.desiredKeywords,
     competitors: brand.competitors.map((c) => c.name),
+    aliasesJson: brand.aliasesJson ?? null,
   };
 }
 

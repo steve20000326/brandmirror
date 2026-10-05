@@ -65,6 +65,10 @@ export default async function AnalysisResultPage({ params }: PageProps) {
       <PageHeader
         title="BrandMirror AI品牌体检"
         description={`${brand.name} · 模型基线扫描分析 · 不等于消费者 App 结果`}
+        action={{
+          href: `/brands/${brand.id}/reports/${scanJobId}`,
+          label: "打开完整报告",
+        }}
       />
 
       <div className="mb-8 rounded-xl border border-slate-900 bg-slate-900 px-6 py-6 text-white">

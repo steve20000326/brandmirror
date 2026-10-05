@@ -77,4 +77,5 @@ export type BrandDossier = {
   desiredPositioning: string | null;
   desiredKeywords: string | null;
   competitors: string[];
+  aliasesJson?: string | null;
 };

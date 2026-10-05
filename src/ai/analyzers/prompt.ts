@@ -3,6 +3,17 @@ import { ANALYZER_PROMPT_VERSION } from "./types";
 
 export { ANALYZER_PROMPT_VERSION };
 
+function aliasList(dossier: BrandDossier): string {
+  if (!dossier.aliasesJson) return dossier.name;
+  try {
+    const parsed = JSON.parse(dossier.aliasesJson) as unknown;
+    if (Array.isArray(parsed)) return parsed.filter((x) => typeof x === "string").join("、") || dossier.name;
+  } catch {
+    return dossier.name;
+  }
+  return dossier.name;
+}
+
 export function buildAnalyzerSystemPrompt(dossier: BrandDossier): string {
   return `你是 BrandMirror 的 Observation Analyzer（${ANALYZER_PROMPT_VERSION}）。
 你的任务是把「扫描模型对消费者问题的回答」结构化，供程序计算 GEO 指标。
@@ -17,6 +28,7 @@ export function buildAnalyzerSystemPrompt(dossier: BrandDossier): string {
 
 ## 客户品牌资料（当前提交）
 品牌名称：${dossier.name}
+品牌别称：${aliasList(dossier)}
 行业：${dossier.industry}
 核心产品：${dossier.coreProducts ?? "（未提供）"}
 目标消费者：${dossier.targetAudience ?? "（未提供）"}

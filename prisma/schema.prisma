@@ -19,6 +19,7 @@ model Brand {
   priceTier          String?
   desiredPositioning String?
   desiredKeywords    String?
+  aliasesJson        String?
   status             String  @default("draft")
 
   // Reserved for future auth / billing
@@ -30,6 +31,7 @@ model Brand {
   scanJobs      ScanJob[]
   brandProfiles BrandProfile[]
   prescriptions Prescription[]
+  diagnoses     Diagnosis[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -147,7 +149,11 @@ model BrandProfile {
   hallucinationRiskScore Float?
   providerMetricsJson    String?
   profileJson            String?
+  portraitJson           String?
   summary                String?
+  profileEngineVersion   String?
+  diagnosisEngineVersion String?
+  prescriptionEngineVersion String?
 
   brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
@@ -155,16 +161,40 @@ model BrandProfile {
   updatedAt DateTime @updatedAt
 }
 
+model Diagnosis {
+  id              String   @id @default(cuid())
+  brandId         String
+  scanJobId       String
+  code            String
+  severity        String
+  title           String
+  finding         String?
+  evidenceJson    String?
+  businessMeaning String?
+  confidence      Float?
+  engineVersion   String?
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
 model Prescription {
-  id        String  @id @default(cuid())
-  brandId   String
-  scanJobId String?
-  priority  Int
-  title     String
-  evidence  String?
-  diagnosis String?
-  action    String?
-  status    String  @default("active")
+  id             String  @id @default(cuid())
+  brandId        String
+  scanJobId      String?
+  priority       Int
+  title          String
+  evidence       String?
+  diagnosis      String?
+  action         String?
+  status         String  @default("active")
+  category       String?
+  expectedEffect String?
+  difficulty     String?
+  timeHorizon    String?
+  engineVersion  String?
+  evidenceSource String?
 
   brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
 

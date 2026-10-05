@@ -1,5 +1,7 @@
 import { ANALYZER_BATCH_SIZE, analyzeObservationBatch } from "@/ai/analyzers/observation-analyzer";
 import type { AnalyzerChat } from "@/ai/analyzers/observation-analyzer";
+import { detectBrandMention } from "@/ai/analyzers/exact-match";
+import { looksLikeUnsupportedSpecifics } from "@/ai/analyzers/finalize";
 import { ANALYZER_PROMPT_VERSION } from "@/ai/analyzers/types";
 import { prisma } from "@/lib/prisma";
 import { computeGeoMetrics, type MetricRow } from "./metrics";
@@ -72,7 +74,40 @@ async function persistResult(
   });
 }
 
+export async function applyRecognitionGuards(scanJobId: string) {
+  const job = await prisma.scanJob.findUnique({
+    where: { id: scanJobId },
+    include: {
+      brand: { include: { competitors: true } },
+      observations: { include: { question: true } },
+    },
+  });
+  if (!job) return 0;
+  const dossier = toBrandDossier(job.brand);
+  let updated = 0;
+  for (const obs of job.observations) {
+    if (obs.analysisStatus !== "completed" || !obs.analysisJson || !obs.rawResponse) continue;
+    if (!obs.question.brandPresent) continue;
+    const mentioned = detectBrandMention(obs.rawResponse, dossier.name, dossier.aliasesJson);
+    if (!mentioned) continue;
+    const parsed = JSON.parse(obs.analysisJson) as AnalyzerResult;
+    let next = parsed;
+    if (
+      (parsed.recognitionStatus === "unknown" || parsed.recognitionStatus === null) &&
+      looksLikeUnsupportedSpecifics(obs.rawResponse, dossier)
+    ) {
+      next = { ...parsed, recognitionStatus: "unsupported_specifics" };
+    }
+    if (next !== parsed || obs.brandMentioned !== true) {
+      await persistResult(obs.id, next, true);
+      updated += 1;
+    }
+  }
+  return updated;
+}
+
 export async function persistBrandProfile(scanJobId: string) {
+  await applyRecognitionGuards(scanJobId);
   const job = await prisma.scanJob.findUnique({
     where: { id: scanJobId },
     include: {
@@ -215,7 +250,8 @@ export async function processAnalysisBatch(
           continue;
         }
         const brandMentioned = Boolean(
-          obs.rawResponse && obs.rawResponse.includes(dossier.name),
+          obs.rawResponse &&
+            detectBrandMention(obs.rawResponse, dossier.name, dossier.aliasesJson),
         );
         await persistResult(obs.id, result, brandMentioned);
       }
@@ -245,4 +281,108 @@ export async function processAnalysisBatch(
     completed: counts.completed,
     status: counts.analysisStatus,
   };
+}
+
+export async function findAliasMissedObservations(scanJobId: string) {
+  const job = await prisma.scanJob.findUnique({
+    where: { id: scanJobId },
+    include: { brand: true, observations: true },
+  });
+  if (!job) return [];
+  return job.observations.filter((obs) => {
+    if (obs.status !== "completed" || !obs.rawResponse) return false;
+    const mentioned = detectBrandMention(
+      obs.rawResponse,
+      job.brand.name,
+      job.brand.aliasesJson,
+    );
+    if (!mentioned) return false;
+    const fullNameHit = obs.rawResponse.includes(job.brand.name);
+    return obs.brandMentioned !== true || !fullNameHit;
+  });
+}
+
+/** Re-run analyzer on selected observations without rescanning models. */
+export async function reanalyzeObservations(
+  scanJobId: string,
+  observationIds: string[],
+  chat?: AnalyzerChat,
+) {
+  if (observationIds.length === 0) {
+    return persistBrandProfile(scanJobId);
+  }
+
+  const job = await prisma.scanJob.findUnique({
+    where: { id: scanJobId },
+    include: { brand: { include: { competitors: true } } },
+  });
+  if (!job) throw new Error("扫描任务不存在");
+  const dossier = toBrandDossier(job.brand);
+
+  await prisma.observation.updateMany({
+    where: { id: { in: observationIds }, scanJobId },
+    data: {
+      analysisStatus: "not_started",
+      analysisErrorMessage: null,
+    },
+  });
+  await prisma.scanJob.update({
+    where: { id: scanJobId },
+    data: { analysisStatus: "running", analyzerVersion: ANALYZER_PROMPT_VERSION },
+  });
+
+  const batch = await prisma.observation.findMany({
+    where: { id: { in: observationIds }, scanJobId },
+    include: { question: true },
+  });
+  const groups = chunk(batch, ANALYZER_BATCH_SIZE);
+  await runPool(groups, ANALYSIS_ANALYZER_CONCURRENCY, async (group) => {
+    const claimed: typeof group = [];
+    for (const item of group) {
+      const updated = await prisma.observation.updateMany({
+        where: { id: item.id },
+        data: { analysisStatus: "running", analysisAttemptCount: { increment: 1 } },
+      });
+      if (updated.count === 1) claimed.push(item);
+    }
+    try {
+      const inputs = claimed.map((obs) => ({
+        observationId: obs.id,
+        question: obs.question.text,
+        questionType: obs.question.questionType ?? "",
+        brandPresent: obs.question.brandPresent,
+        response: obs.rawResponse ?? "",
+      }));
+      const analyzed = await analyzeObservationBatch(inputs, dossier, chat);
+      for (const obs of claimed) {
+        const result = analyzed.get(obs.id);
+        if (!result) {
+          await prisma.observation.update({
+            where: { id: obs.id },
+            data: {
+              analysisStatus: "failed",
+              analysisErrorMessage: "Analyzer 未返回该 observationId",
+            },
+          });
+          continue;
+        }
+        const brandMentioned = Boolean(
+          obs.rawResponse &&
+            detectBrandMention(obs.rawResponse, dossier.name, dossier.aliasesJson),
+        );
+        await persistResult(obs.id, result, brandMentioned);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message.slice(0, 240) : "分析失败";
+      for (const obs of claimed) {
+        await prisma.observation.update({
+          where: { id: obs.id },
+          data: { analysisStatus: "failed", analysisErrorMessage: message },
+        });
+      }
+    }
+  });
+
+  await refreshAnalysisJobCounts(scanJobId);
+  return persistBrandProfile(scanJobId);
 }

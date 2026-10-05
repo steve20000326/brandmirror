@@ -8,6 +8,7 @@ import {
   countPlanQuestions,
   saveGeneratedQuestions,
 } from "@/server/brands/questions";
+import { defaultBrandAliases } from "@/domain/brands/brand-matcher";
 import { emptyToNull, parseBrandFormData } from "@/server/brands/schema";
 
 export type CreateBrandState = {
@@ -43,6 +44,7 @@ export async function createBrand(
           priceTier: emptyToNull(data.priceTier),
           desiredPositioning: emptyToNull(data.desiredPositioning),
           desiredKeywords: emptyToNull(data.desiredKeywords),
+          aliasesJson: JSON.stringify(defaultBrandAliases(data.name)),
           status: "draft",
           competitors: {
             create: data.competitors.map((name) => ({ name })),
