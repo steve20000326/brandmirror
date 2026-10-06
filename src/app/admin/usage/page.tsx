@@ -16,7 +16,8 @@ export default async function AdminUsagePage() {
         Completion Tokens {usage.overall.completionTokens} · Total Tokens {usage.overall.totalTokens}
       </p>
       <p className="mt-1 text-xs text-slate-500">
-        Scan Request 只统计挂在 ScanJob 上的成功模型调用（一次成功 Observation 记 1 次）。失败重试不记账；单元测试残留不计入。
+        Scan Request 只统计挂在 ScanJob 上的真实模型调用。新扫描以 Observation.apiAttemptCount 为准（含失败重试）。
+        读取 pending、batch 轮询、页面刷新不写入 ModelUsage。Day 3早期扫描的Request统计可能包含旧版计数误差。
       </p>
       <p className="mt-1 text-sm text-slate-600">
         Known CNY {overall.knownCny ?? "—"} · Known USD {overall.knownUsd ?? "—"}

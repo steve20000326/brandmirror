@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import type { ProviderId } from "@/ai/providers/types";
 import { CONSUMER_BASELINE_PROMPT_VERSION } from "@/ai/prompts/consumer-baseline";
-import { FASHION_PACK_VERSION } from "@/domain/industry-packs/fashion";
+import { getIndustryPack } from "@/domain/industry-packs";
 import { PROVIDER_LABELS } from "@/server/scans/types";
 import { getBrandById } from "@/server/brands/queries";
 import { getScanJobById, listScanObservations, listScanUsage } from "@/server/scans/queries";
@@ -99,8 +99,8 @@ export default async function ScanResultPage({ params }: PageProps) {
           </p>
         </div>
         <div>
-          <p className="text-xs text-slate-500">Fashion Pack Version</p>
-          <p className="mt-1">{FASHION_PACK_VERSION}</p>
+          <p className="text-xs text-slate-500">Industry Pack</p>
+          <p className="mt-1">{getIndustryPack(brand.industry)?.version ?? "—"}</p>
         </div>
         <div>
           <p className="text-xs text-slate-500">Prompt Version</p>

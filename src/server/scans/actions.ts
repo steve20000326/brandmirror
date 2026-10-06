@@ -1,5 +1,5 @@
 import { getUnconfiguredScanProviders, listScanProviders } from "@/ai/providers";
-import { FASHION_PACK_VERSION } from "@/domain/industry-packs/fashion";
+import { getIndustryPack } from "@/domain/industry-packs";
 import { prisma } from "@/lib/prisma";
 import { countPlanQuestions } from "@/server/brands/questions";
 import { buildObservationPlan, expectedObservationCount } from "./plan";
@@ -33,7 +33,12 @@ export async function createScanJobForBrand(brandId: string): Promise<CreateScan
     return { ok: false, error: "品牌不存在" };
   }
 
-  const questionCount = await countPlanQuestions(brandId, FASHION_PACK_VERSION);
+  const pack = getIndustryPack(brand.industry);
+  if (!pack) {
+    return { ok: false, error: "当前行业尚未开放 Industry Pack" };
+  }
+
+  const questionCount = await countPlanQuestions(brandId, pack.version);
   if (questionCount !== 30) {
     return { ok: false, error: "请先生成完整的30题测试方案" };
   }
@@ -44,7 +49,7 @@ export async function createScanJobForBrand(brandId: string): Promise<CreateScan
   }
 
   const questions = await prisma.question.findMany({
-    where: { brandId, source: FASHION_PACK_VERSION, enabled: true },
+    where: { brandId, source: pack.version, enabled: true },
     select: { id: true },
     orderBy: { createdAt: "asc" },
   });
@@ -64,6 +69,7 @@ export async function createScanJobForBrand(brandId: string): Promise<CreateScan
         totalTasks: total,
         completedTasks: 0,
         failedTasks: 0,
+        usageAccountingVersion: "attempts-v1",
       },
     });
 

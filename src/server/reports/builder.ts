@@ -1,7 +1,6 @@
 import type { BrandPortrait } from "@/ai/profile/types";
 import { NO_STABLE_COGNITION } from "@/ai/profile/types";
 import { CONSUMER_BASELINE_PROMPT_VERSION } from "@/ai/prompts/consumer-baseline";
-import { FASHION_PACK_VERSION } from "@/domain/industry-packs/fashion";
 import type { GeoMetrics } from "@/server/analysis/metrics";
 import { PROVIDER_MODEL_LABELS } from "@/server/scans/types";
 import { detectBrandMirrorStage } from "./stage";
@@ -69,6 +68,15 @@ export function getReportStatus(input: {
 
 function clampSummary(text: string): string {
   return text.trim();
+}
+
+export function clientRiskExplanation(review?: {
+  confirmedFalse: number;
+} | null): string {
+  if (review && review.confirmedFalse > 0) {
+    return "AI存在错误品牌信息。经人工核实，部分模型给出的具体事实与品牌真实情况不符。该指标不计入 AI Brand Score。";
+  }
+  return "AI生成了品牌方当前资料中未提供的具体信息，建议核实其真实性与公开来源。该指标不计入 AI Brand Score。";
 }
 
 export function buildExecutiveSummary(params: {
@@ -140,6 +148,7 @@ export function buildClientReportViewModel(input: {
     difficulty: string | null;
     timeHorizon: string | null;
   }>;
+  factReview?: { confirmedFalse: number } | null;
 }): ClientReportViewModel {
   const metrics = input.metrics;
   const stage = detectBrandMirrorStage({
@@ -286,8 +295,7 @@ export function buildClientReportViewModel(input: {
     risk: {
       label: "AI认知风险",
       value: metrics.hallucinationRisk,
-      explanation:
-        "当公开品牌信息不足时，部分模型可能自行补全未经品牌资料支持的信息。该指标不计入 AI Brand Score。",
+      explanation: clientRiskExplanation(input.factReview),
     },
     profile: {
       fields: profileFields,
@@ -346,4 +354,4 @@ export function buildClientReportViewModel(input: {
   };
 }
 
-export { FASHION_PACK_VERSION, CONSUMER_BASELINE_PROMPT_VERSION };
+export { CONSUMER_BASELINE_PROMPT_VERSION };

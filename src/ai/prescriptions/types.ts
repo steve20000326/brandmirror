@@ -24,3 +24,15 @@ export type PrescriptionItem = {
   timeHorizon: "short" | "medium" | "long";
   evidenceSource: "model_observation" | "brand_profile" | "competitor_gap";
 };
+
+export type PrescriptionFacts = {
+  brandName: string;
+  industry: string;
+  targetAudience: string | null;
+  priceTier: string | null;
+  desiredPositioning: string | null;
+  coreProducts: string | null;
+  metrics: import("@/server/analysis/metrics").GeoMetrics;
+  portrait: import("@/ai/profile/types").BrandPortrait;
+  diagnoses: import("@/ai/diagnosis/types").DiagnosisItem[];
+};

@@ -1,5 +1,5 @@
 import { CONSUMER_BASELINE_PROMPT_VERSION } from "@/ai/prompts/consumer-baseline";
-import { FASHION_PACK_VERSION } from "@/domain/industry-packs/fashion";
+import { getIndustryPack } from "@/domain/industry-packs";
 import { prisma } from "@/lib/prisma";
 import type { ProviderId } from "@/ai/providers/types";
 import { SCAN_PROVIDER_IDS } from "./types";
@@ -105,7 +105,7 @@ export async function getScanResultMeta(scanJobId: string) {
   if (!job) return null;
   return {
     job,
-    fashionPack: FASHION_PACK_VERSION,
+    packVersion: getIndustryPack(job.brand.industry)?.version ?? null,
     promptVersion: CONSUMER_BASELINE_PROMPT_VERSION,
     searchEnabled: false,
     surfaceType: "model_api",

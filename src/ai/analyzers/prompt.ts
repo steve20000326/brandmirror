@@ -58,7 +58,8 @@ recognitionStatus（仅 brandPresent=true 的题必须填写；无品牌题填 n
 profileAlignment 每个维度取值 1 / 0.5 / 0 / null
   1=基本一致 0.5=部分一致 0=明显不一致 null=回答未涉及该维度
   若模型明确说信息不足：全部填 null，不要打 0
-unsupportedClaims: 克制。建议去官网了解 不是幻觉。资料未提供的具体渠道/价格/用户年龄/英文名/成立时间才记录。
+claimedAttributes.style: 通用气质/表达风格，不是女装专属字段。
+industryAttributes: 行业附加属性（如服装的版型、食品的口味）。没有则输出 {}。
 competitors: 回答中出现的品牌名，含客户品牌与其他品牌；rank 有明确排序才填。
 
 每条结果必须包含输入中的 observationId，禁止只靠数组顺序对应。`;

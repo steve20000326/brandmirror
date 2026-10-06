@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { detectBrandMention, detectCompetitorMentions } from "./exact-match";
 import { finalizeAnalyzerResult } from "./finalize";
-import type { AnalyzerResultParsed } from "./schema";
+import type { AnalyzerResult } from "./types";
 import type { BrandDossier } from "./types";
 
 const dossier: BrandDossier = {
@@ -15,7 +15,7 @@ const dossier: BrandDossier = {
   competitors: ["玖姿", "朗姿", "哥弟"],
 };
 
-function baseLlm(over: Partial<AnalyzerResultParsed> = {}): AnalyzerResultParsed {
+function baseLlm(over: Partial<AnalyzerResult> = {}): AnalyzerResult {
   return {
     observationId: "obs-1",
     answerStatus: "answered",

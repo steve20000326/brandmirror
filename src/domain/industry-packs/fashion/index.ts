@@ -6,6 +6,9 @@ import {
 } from "./constants";
 import { generateFashionQuestions } from "./generator";
 import { FASHION_QUESTION_BANK } from "./question-bank";
+import { FASHION_PROFILE_DIMENSIONS } from "./profile-schema";
+import { fashionDiagnosisRules } from "./diagnosis-rules";
+import { fashionPrescriptionRules } from "./prescription-rules";
 import type { IndustryPack } from "../types";
 
 export const fashionPack: IndustryPack = {
@@ -15,6 +18,9 @@ export const fashionPack: IndustryPack = {
   planQuota: FASHION_PLAN_QUOTA,
   templates: FASHION_QUESTION_BANK,
   generateQuestions: generateFashionQuestions,
+  getProfileDimensions: () => [...FASHION_PROFILE_DIMENSIONS],
+  getDiagnosisRules: () => fashionDiagnosisRules,
+  getPrescriptionRules: () => fashionPrescriptionRules,
 };
 
 export {

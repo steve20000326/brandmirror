@@ -21,6 +21,7 @@ model Brand {
   desiredKeywords    String?
   aliasesJson        String?
   isCalibration      Boolean @default(false)
+  cohort             String  @default("customer")
   status             String  @default("draft")
 
   // Reserved for future auth / billing
@@ -33,6 +34,7 @@ model Brand {
   brandProfiles BrandProfile[]
   prescriptions Prescription[]
   diagnoses     Diagnosis[]
+  pilotFeedback PilotFeedback[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -86,6 +88,7 @@ model ScanJob {
   analysisStartedAt   DateTime?
   analysisCompletedAt DateTime?
   analyzerVersion     String?
+  usageAccountingVersion String @default("legacy")
 
   brand        Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
   observations Observation[]
@@ -121,6 +124,10 @@ model Observation {
   searchEnabled Boolean @default(false)
   latencyMs     Int?
   attemptCount  Int     @default(0)
+  apiAttemptCount Int   @default(0)
+  factReviewStatus String?
+  factReviewNote   String?
+  factReviewJson   String?
   responseId    String?
   promptVersion String  @default("consumer-baseline-v0.1")
   finishReason  String?
@@ -209,6 +216,7 @@ model ModelUsage {
   provider         String
   model            String
   purpose          String?
+  usageEventType   String  @default("api_call")
   promptTokens     Int      @default(0)
   completionTokens Int      @default(0)
   totalTokens      Int      @default(0)
@@ -229,6 +237,26 @@ model ReportShare {
   scanJobId  String   @unique
   shareToken String   @unique
   enabled    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+}
+
+model PilotFeedback {
+  id                 String   @id @default(cuid())
+  brandId            String
+  scanJobId          String
+  newInsight         String?
+  surprisingInsight  String?
+  incorrectFinding   String?
+  actionableItems    String?
+  preferredFrequency String?
+  willingness        String?
+  willingnessNote    String?
+  quotedPrice        Float?
+  paid               Boolean  @default(false)
+  humanMinutesJson   String?
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }

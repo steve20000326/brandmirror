@@ -33,6 +33,7 @@ export type ClaimedAttributes = {
   scenarios: string[];
   productCategories: string[];
   positioning: string[];
+  industryAttributes?: Record<string, string[]>;
 };
 
 export type CompetitorMention = {

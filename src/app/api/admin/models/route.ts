@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       provider: target.provider,
       model: target.model,
       purpose: "connection_test",
+      usageEventType: "api_call",
       promptTokens: 0,
       completionTokens: 0,
       totalTokens: 0,

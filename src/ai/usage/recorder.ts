@@ -1,13 +1,22 @@
 import { prisma } from "@/lib/prisma";
-import { calculateTokenCost, roundMoney } from "@/ai/pricing/calculator";
+import { calculateTokenCost } from "@/ai/pricing/calculator";
 import type { UsagePurpose } from "@/ai/pricing/types";
 import type { AnalyzerChat } from "@/ai/analyzers/observation-analyzer";
+
+export type UsageEventType = "api_call" | "retry" | "analysis_call";
+
+export function usageEventTypeForPurpose(purpose: UsagePurpose, attempt = 1): UsageEventType {
+  if (purpose === "scan") return attempt > 1 ? "retry" : "api_call";
+  if (purpose === "connection_test") return "api_call";
+  return "analysis_call";
+}
 
 export async function recordModelUsage(params: {
   scanJobId?: string | null;
   provider: string;
   model: string;
   purpose: UsagePurpose;
+  usageEventType?: UsageEventType;
   promptTokens?: number;
   completionTokens?: number;
   totalTokens?: number;
@@ -29,6 +38,7 @@ export async function recordModelUsage(params: {
       provider: params.provider,
       model: params.model,
       purpose: params.purpose,
+      usageEventType: params.usageEventType ?? usageEventTypeForPurpose(params.purpose),
       promptTokens,
       completionTokens,
       totalTokens,
@@ -54,6 +64,7 @@ export function wrapChatWithUsage(
         provider: result.provider || meta.fallbackProvider,
         model: result.model || meta.fallbackModel,
         purpose: meta.purpose,
+        usageEventType: "analysis_call",
         promptTokens: result.usage?.promptTokens ?? 0,
         completionTokens: result.usage?.completionTokens ?? 0,
         totalTokens: result.usage?.totalTokens,
@@ -62,5 +73,3 @@ export function wrapChatWithUsage(
     },
   };
 }
-
-export { roundMoney };

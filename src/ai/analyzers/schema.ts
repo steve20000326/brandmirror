@@ -86,6 +86,10 @@ export const analyzerResultSchema = z.object({
       scenarios: z.array(z.string()).default([]),
       productCategories: z.array(z.string()).default([]),
       positioning: z.array(z.string()).default([]),
+      industryAttributes: z.preprocess(
+        (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : undefined),
+        z.record(z.string(), z.array(z.string())).optional(),
+      ),
     }),
   ),
   competitors: z.array(

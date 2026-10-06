@@ -23,3 +23,17 @@ export type DiagnosisItem = {
   businessMeaning: string;
   confidence: number;
 };
+
+export type DiagnosisFacts = {
+  brandName: string;
+  industry?: string | null;
+  metrics: import("@/server/analysis/metrics").GeoMetrics;
+  portrait: import("@/ai/profile/types").BrandPortrait;
+  absentQuestionCount: number;
+  absentMentionCount: number;
+  presentQuestionCount: number;
+  recommendedOnAbsent: number;
+  desiredAudience: string | null;
+  desiredPositioning: string | null;
+  desiredPriceTier: string | null;
+};

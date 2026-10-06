@@ -1,4 +1,4 @@
-import { FASHION_PACK_VERSION } from "@/domain/industry-packs/fashion";
+import { getIndustryPack } from "@/domain/industry-packs";
 import { prisma } from "@/lib/prisma";
 import type { BrandDetail, BrandListItem } from "@/types/brand";
 
@@ -45,17 +45,26 @@ export async function getBrandById(id: string): Promise<BrandDetail | null> {
     desiredKeywords: brand.desiredKeywords,
     status: brand.status,
     isCalibration: brand.isCalibration,
+    cohort: brand.cohort,
+    aliasesJson: brand.aliasesJson,
     createdAt: brand.createdAt,
     competitors: brand.competitors,
   };
 }
 
-/** Whether this brand already has a complete Fashion v0.1 plan. */
+/** Whether this brand already has a complete question plan for its Industry Pack. */
 export async function brandHasQuestionPlan(brandId: string): Promise<boolean> {
+  const brand = await prisma.brand.findUnique({
+    where: { id: brandId },
+    select: { industry: true },
+  });
+  if (!brand) return false;
+  const pack = getIndustryPack(brand.industry);
+  if (!pack) return false;
   const count = await prisma.question.count({
     where: {
       brandId,
-      source: FASHION_PACK_VERSION,
+      source: pack.version,
       enabled: true,
     },
   });

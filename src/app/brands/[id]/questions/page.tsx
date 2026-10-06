@@ -3,10 +3,6 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { getIndustryPack } from "@/domain/industry-packs";
-import {
-  FASHION_PACK_LABEL,
-  FASHION_PACK_VERSION,
-} from "@/domain/industry-packs/fashion";
 import type { QuestionCategory } from "@/domain/industry-packs/types";
 import { QUESTION_CATEGORY_META } from "@/lib/question-meta";
 import { getBrandById } from "@/server/brands/queries";
@@ -117,7 +113,7 @@ export default async function BrandQuestionsPage({ params }: PageProps) {
         </div>
         <div>
           <p className="text-xs text-slate-500">Industry Pack</p>
-          <p className="mt-1 font-medium text-slate-900">{FASHION_PACK_LABEL}</p>
+          <p className="mt-1 font-medium text-slate-900">{pack.label}</p>
         </div>
       </div>
 
@@ -128,7 +124,7 @@ export default async function BrandQuestionsPage({ params }: PageProps) {
         <p className="mt-2 text-sm leading-6 text-slate-300">
           这些问题用于测试消费者没有主动提及品牌时，AI是否仍会自然想到并推荐该品牌。
           （含品牌 {withBrand} 题 · 无品牌 {withoutBrand} 题 · 来源{" "}
-          {FASHION_PACK_VERSION}）
+          {pack.version}）
         </p>
       </div>
 

@@ -1,20 +1,12 @@
-import type { BrandPortrait } from "@/ai/profile/types";
 import { NO_STABLE_COGNITION } from "@/ai/profile/types";
-import type { GeoMetrics } from "@/server/analysis/metrics";
-import { DIAGNOSIS_ENGINE_VERSION, type DiagnosisCode, type DiagnosisItem } from "./types";
+import {
+  DIAGNOSIS_ENGINE_VERSION,
+  type DiagnosisCode,
+  type DiagnosisFacts,
+  type DiagnosisItem,
+} from "./types";
 
-export type DiagnosisFacts = {
-  brandName: string;
-  metrics: GeoMetrics;
-  portrait: BrandPortrait;
-  absentQuestionCount: number;
-  absentMentionCount: number;
-  presentQuestionCount: number;
-  recommendedOnAbsent: number;
-  desiredAudience: string | null;
-  desiredPositioning: string | null;
-  desiredPriceTier: string | null;
-};
+export type { DiagnosisFacts };
 
 function overlap(a: string, b: string): boolean {
   const na = a.replace(/\s/g, "");
@@ -98,7 +90,7 @@ export function detectDiagnoses(facts: DiagnosisFacts): DiagnosisItem[] {
           .map(([n, p]) => `${n} ${Math.round(p * 10) / 10}`)
           .join("；")}。`,
       ],
-      businessMeaning: "在职业女装/通勤场景中，模型的默认候选集已被竞争品牌占据。",
+      businessMeaning: "在该品类提问中，模型的默认候选集已被竞争品牌占据。",
       confidence: 0.9,
     });
   }

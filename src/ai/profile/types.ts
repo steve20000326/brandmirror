@@ -51,4 +51,6 @@ export type BrandPortrait = {
   executiveSummary: string;
   hasStableCognition: boolean;
   engineVersion: string;
+  /** Pack-specific extras. Core dimensions stay industry-agnostic. */
+  industryAttributes?: Record<string, unknown>;
 };

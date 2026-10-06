@@ -59,6 +59,14 @@ export default async function BrandDetailPage({ params }: PageProps) {
             <InfoRow label="核心产品" value={brand.coreProducts} />
             <InfoRow label="目标消费者" value={brand.targetAudience} />
             <InfoRow label="价格档次" value={brand.priceTier} />
+            <InfoRow
+              label="品牌别称"
+              value={
+                brand.aliasesJson
+                  ? (JSON.parse(brand.aliasesJson) as string[]).join("、")
+                  : null
+              }
+            />
           </dl>
         </section>
 

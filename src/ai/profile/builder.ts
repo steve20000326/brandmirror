@@ -1,5 +1,6 @@
 import type { AnalyzerResult, ClaimedAttributes } from "@/ai/analyzers/types";
 import type { GeoMetrics } from "@/server/analysis/metrics";
+import { getIndustryPack } from "@/domain/industry-packs";
 import {
   BRAND_PROFILE_VERSION,
   NO_STABLE_COGNITION,
@@ -19,6 +20,7 @@ export type ProfileObservation = {
 
 export type ProfileBrandInput = {
   name: string;
+  industry?: string | null;
   targetAudience: string | null;
   priceTier: string | null;
   desiredPositioning: string | null;
@@ -216,6 +218,26 @@ export function buildBrandPortrait(
     executiveSummary,
     hasStableCognition,
     engineVersion: BRAND_PROFILE_VERSION,
+    industryAttributes: collectIndustryAttributes(brand, present),
+  };
+}
+
+function collectIndustryAttributes(
+  brand: ProfileBrandInput,
+  present: ProfileObservation[],
+): Record<string, unknown> {
+  const pack = getIndustryPack(brand.industry ?? "");
+  const extras: Record<string, string[]> = {};
+  for (const obs of present) {
+    const raw = obs.analysis.claimedAttributes.industryAttributes ?? {};
+    for (const [key, values] of Object.entries(raw)) {
+      extras[key] = [...new Set([...(extras[key] ?? []), ...values])];
+    }
+  }
+  return {
+    packId: pack?.id ?? null,
+    dimensions: pack?.getProfileDimensions() ?? [],
+    extras,
   };
 }
 

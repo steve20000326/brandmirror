@@ -126,8 +126,15 @@ describe("scan job persistence", () => {
     expect(byProvider("deepseek")[0]?.rawResponse).toBe("answer from deepseek");
     expect(rows.every((r) => r.searchEnabled === false)).toBe(true);
     expect(rows.every((r) => r.surfaceType === "model_api")).toBe(true);
+    expect(byProvider("deepseek").every((r) => r.apiAttemptCount === 1)).toBe(true);
+    expect(byProvider("tencent-hy").every((r) => r.apiAttemptCount === 1)).toBe(true);
+    expect(byProvider("qwen").every((r) => r.apiAttemptCount === 3)).toBe(true);
+
+    const usageRows = await prisma.modelUsage.count({ where: { scanJobId: job!.id } });
+    expect(usageRows).toBe(0);
 
     const refreshed = await prisma.scanJob.findUnique({ where: { id: job!.id } });
+    expect(refreshed?.usageAccountingVersion).toBe("attempts-v1");
     expect(refreshed?.status).toBe("partial");
     expect(refreshed?.completedTasks).toBe(60);
     expect(refreshed?.failedTasks).toBe(30);

@@ -3,6 +3,7 @@ import type { BrandPortrait } from "@/ai/profile/types";
 import type { GeoMetrics } from "@/server/analysis/metrics";
 import { buildClientReportViewModel, getReportStatus } from "./builder";
 import type { ClientReportViewModel } from "./types";
+import { loadFactReviewRows, summarizeFactReviews } from "@/server/admin/fact-review";
 
 export async function loadClientReport(scanJobId: string): Promise<{
   view: ClientReportViewModel | null;
@@ -15,7 +16,7 @@ export async function loadClientReport(scanJobId: string): Promise<{
   });
   if (!job) return null;
 
-  const [profile, diagnoses, prescriptions, questionCounts, observationCount] = await Promise.all([
+  const [profile, diagnoses, prescriptions, questionCounts, observationCount, factRows] = await Promise.all([
     prisma.brandProfile.findFirst({ where: { scanJobId } }),
     prisma.diagnosis.findMany({ where: { scanJobId }, orderBy: { createdAt: "asc" } }),
     prisma.prescription.findMany({ where: { scanJobId }, orderBy: { priority: "asc" } }),
@@ -25,6 +26,7 @@ export async function loadClientReport(scanJobId: string): Promise<{
       _count: { _all: true },
     }),
     prisma.observation.count({ where: { scanJobId } }),
+    loadFactReviewRows(scanJobId),
   ]);
 
   const brandedQuestionCount = questionCounts.find((q) => q.brandPresent)?._count._all ?? 0;
@@ -73,6 +75,7 @@ export async function loadClientReport(scanJobId: string): Promise<{
     summary: profile.summary,
     diagnoses,
     prescriptions,
+    factReview: summarizeFactReviews(factRows),
   });
 
   view.reportMeta.status = status;

@@ -39,6 +39,21 @@ export interface BrandGenerationContext {
   competitors: Array<{ name: string }>;
 }
 
+export type ProfileDimension = {
+  key: string;
+  label: string;
+};
+
+export type PackDiagnosisRule = (
+  facts: unknown,
+  items: unknown[],
+) => unknown[];
+
+export type PackPrescriptionRule = (
+  facts: unknown,
+  items: unknown[],
+) => unknown[];
+
 export interface IndustryPack {
   id: string;
   version: string;
@@ -47,4 +62,7 @@ export interface IndustryPack {
   planQuota: Record<QuestionCategory, number>;
   templates: QuestionTemplate[];
   generateQuestions: (ctx: BrandGenerationContext) => GeneratedQuestion[];
+  getProfileDimensions: () => ProfileDimension[];
+  getDiagnosisRules: () => PackDiagnosisRule[];
+  getPrescriptionRules: () => PackPrescriptionRule[];
 }

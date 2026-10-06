@@ -233,6 +233,7 @@ function lanxuFacts(portrait = buildBrandPortrait(
 )): DiagnosisFacts {
   return {
     brandName: "澜序女装",
+    industry: "品牌女装",
     metrics: metrics(),
     portrait,
     absentQuestionCount: 54,

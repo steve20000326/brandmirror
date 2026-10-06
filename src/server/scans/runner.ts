@@ -6,7 +6,7 @@ import { getProvider } from "@/ai/providers";
 import { publicErrorMessage, shouldRetry } from "@/ai/providers/errors";
 import type { ModelProvider, ProviderId } from "@/ai/providers/types";
 import { prisma } from "@/lib/prisma";
-import { calculateTokenCost } from "@/ai/pricing/calculator";
+import { recordModelUsage, usageEventTypeForPurpose } from "@/ai/usage/recorder";
 import { SCAN_BATCH_SIZE, SCAN_CONCURRENCY, SCAN_MAX_ATTEMPTS } from "./types";
 
 const RETRY_DELAYS_MS = [1000, 3000];
@@ -85,6 +85,14 @@ async function processOneObservation(
   let lastError = "未知错误";
 
   for (let attempt = 1; attempt <= SCAN_MAX_ATTEMPTS; attempt += 1) {
+    await prisma.observation.update({
+      where: { id: observation.id },
+      data: {
+        apiAttemptCount: { increment: 1 },
+        attemptCount: attempt,
+      },
+    });
+
     try {
       const result = await provider.chat({
         messages: [
@@ -95,61 +103,51 @@ async function processOneObservation(
         maxTokens: 800,
       });
 
-      const cost = calculateTokenCost({
+      await recordModelUsage({
+        scanJobId: observation.scanJobId,
         provider: result.provider,
         model: result.model,
+        purpose: "scan",
+        usageEventType: usageEventTypeForPurpose("scan", attempt),
         promptTokens: result.usage?.promptTokens ?? 0,
         completionTokens: result.usage?.completionTokens ?? 0,
+        totalTokens: result.usage?.totalTokens ?? 0,
       });
 
-      const persistUsage = !process.env.VITEST;
-      await prisma.$transaction([
-        prisma.observation.update({
-          where: { id: observation.id },
-          data: {
-            status: "completed",
-            rawResponse: result.content,
-            latencyMs: result.latencyMs ?? null,
-            responseId: result.responseId ?? null,
-            attemptCount: attempt,
-            errorMessage: null,
-            promptVersion: CONSUMER_BASELINE_PROMPT_VERSION,
-            surfaceType: "model_api",
-            searchEnabled: false,
-            model: result.model,
-            brandMentioned: null,
-            brandRank: null,
-            recommended: null,
-            competitorsJson: null,
-            attributesJson: null,
-            analysisJson: null,
-          },
-        }),
-        ...(persistUsage
-          ? [
-              prisma.modelUsage.create({
-                data: {
-                  scanJobId: observation.scanJobId,
-                  provider: result.provider,
-                  model: result.model,
-                  purpose: "scan",
-                  promptTokens: result.usage?.promptTokens ?? 0,
-                  completionTokens: result.usage?.completionTokens ?? 0,
-                  totalTokens: result.usage?.totalTokens ?? 0,
-                  estimatedCost: cost.totalCost ?? 0,
-                  inputCost: cost.inputCost,
-                  outputCost: cost.outputCost,
-                  totalCost: cost.totalCost,
-                  currency: cost.currency,
-                  pricingVersion: cost.pricingVersion,
-                },
-              }),
-            ]
-          : []),
-      ]);
+      await prisma.observation.update({
+        where: { id: observation.id },
+        data: {
+          status: "completed",
+          rawResponse: result.content,
+          latencyMs: result.latencyMs ?? null,
+          responseId: result.responseId ?? null,
+          attemptCount: attempt,
+          errorMessage: null,
+          promptVersion: CONSUMER_BASELINE_PROMPT_VERSION,
+          surfaceType: "model_api",
+          searchEnabled: false,
+          model: result.model,
+          brandMentioned: null,
+          brandRank: null,
+          recommended: null,
+          competitorsJson: null,
+          attributesJson: null,
+          analysisJson: null,
+        },
+      });
       return;
     } catch (err) {
       lastError = publicErrorMessage(err);
+      await recordModelUsage({
+        scanJobId: observation.scanJobId,
+        provider: observation.provider,
+        model: observation.model,
+        purpose: "scan",
+        usageEventType: usageEventTypeForPurpose("scan", attempt),
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+      });
       await prisma.observation.update({
         where: { id: observation.id },
         data: {

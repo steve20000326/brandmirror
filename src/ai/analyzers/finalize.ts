@@ -31,7 +31,7 @@ export function emptyAlignment() {
  * brandMentioned is never taken from the LLM.
  */
 export function finalizeAnalyzerResult(params: {
-  llm: AnalyzerResultParsed;
+  llm: AnalyzerResult;
   rawResponse: string;
   brandPresent: boolean;
   dossier: BrandDossier;

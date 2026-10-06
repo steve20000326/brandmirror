@@ -20,6 +20,7 @@ export type BrandListItem = {
   industry: string;
   status: string;
   createdAt: Date;
+  cohort?: string;
 };
 
 export type BrandDetail = {
@@ -34,8 +35,10 @@ export type BrandDetail = {
   priceTier: string | null;
   desiredPositioning: string | null;
   desiredKeywords: string | null;
+  aliasesJson: string | null;
   status: string;
   isCalibration: boolean;
+  cohort: string;
   createdAt: Date;
   competitors: Array<{
     id: string;

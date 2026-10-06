@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { loadAdminBrands } from "@/server/admin/overview";
+import { loadAdminBrands, cohortLabel } from "@/server/admin/overview";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +12,7 @@ export default async function AdminBrandsPage() {
         <thead className="text-slate-500">
           <tr>
             <th className="py-2">品牌</th>
+            <th>标签</th>
             <th>行业</th>
             <th>创建时间</th>
             <th>最新扫描</th>
@@ -23,10 +24,14 @@ export default async function AdminBrandsPage() {
           {brands.map((b) => (
             <tr key={b.id} className="border-t border-slate-100">
               <td className="py-2">
-                {b.name}
-                {b.isCalibration ? (
-                  <span className="ml-2 text-xs text-amber-700">Calibration</span>
-                ) : null}
+                <Link href={`/admin/brands/${b.id}`} className="underline">
+                  {b.name}
+                </Link>
+              </td>
+              <td>
+                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">
+                  {cohortLabel(b.cohort, b.isCalibration)}
+                </span>
               </td>
               <td>{b.industry}</td>
               <td>{b.createdAt.toISOString().slice(0, 10)}</td>

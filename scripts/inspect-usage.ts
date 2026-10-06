@@ -86,6 +86,7 @@ async function main() {
     _avg: { promptTokens: true, completionTokens: true },
   });
   console.log("NULL_META", nullMeta);
+  console.log(JSON.stringify({
     obs,
     usage,
     nullJob,
@@ -107,6 +108,8 @@ async function main() {
     lanxuObsByStatus,
     createdBuckets: createdBuckets.map((r) => ({ day: r.day, n: Number(r.n) })),
     dupCheck: dupCheck.map((r) => ({ ...r, n: Number(r.n) })),
+    samples,
+    tokenHist: tokenHist.map((r) => ({ ...r, n: Number(r.n) })),
   }, null, 2));
 }
 

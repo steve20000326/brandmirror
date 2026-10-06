@@ -1,11 +1,12 @@
 import type { AnalyzerChat } from "@/ai/analyzers/observation-analyzer";
 import { extractJsonText } from "@/ai/analyzers/finalize";
+import { applyPackPrescriptionRules } from "@/domain/industry-packs/apply";
 import { PRESCRIPTION_PROMPT } from "./prompt";
 import {
   assertPrescriptionQuality,
   draftPrescriptions,
-  type PrescriptionFacts,
 } from "./rules";
+import type { PrescriptionFacts } from "./types";
 import { prescriptionBatchSchema } from "./schema";
 import { PRESCRIPTION_ENGINE_VERSION, type PrescriptionItem } from "./types";
 
@@ -13,7 +14,7 @@ export async function runPrescriptionEngine(
   facts: PrescriptionFacts,
   chat?: AnalyzerChat,
 ): Promise<PrescriptionItem[]> {
-  const drafted = draftPrescriptions(facts);
+  const drafted = applyPackPrescriptionRules(facts, draftPrescriptions(facts));
   let items = drafted;
   if (chat) {
     try {

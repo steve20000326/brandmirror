@@ -1,7 +1,9 @@
+import { applyPackDiagnosisRules } from "@/domain/industry-packs/apply";
 import type { AnalyzerChat } from "@/ai/analyzers/observation-analyzer";
 import { extractJsonText } from "@/ai/analyzers/finalize";
 import { DIAGNOSIS_EXPLAIN_PROMPT } from "./prompt";
-import { detectDiagnoses, type DiagnosisFacts } from "./rules";
+import { detectDiagnoses } from "./rules";
+import type { DiagnosisFacts } from "./types";
 import { diagnosisBatchSchema } from "./schema";
 import { DIAGNOSIS_ENGINE_VERSION, type DiagnosisItem } from "./types";
 
@@ -25,7 +27,7 @@ export async function runDiagnosisEngine(
   facts: DiagnosisFacts,
   chat?: AnalyzerChat,
 ): Promise<DiagnosisItem[]> {
-  const ruled = detectDiagnoses(facts);
+  const ruled = applyPackDiagnosisRules(facts, detectDiagnoses(facts));
   if (!chat || ruled.length === 0) return ruled;
 
   try {

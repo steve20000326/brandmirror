@@ -39,6 +39,7 @@ export async function generateScanReport(scanJobId: string, chat?: AnalyzerChat)
   const portrait = buildBrandPortrait(
     {
       name: job.brand.name,
+      industry: job.brand.industry,
       targetAudience: job.brand.targetAudience,
       priceTier: job.brand.priceTier,
       desiredPositioning: job.brand.desiredPositioning,
@@ -73,6 +74,7 @@ export async function generateScanReport(scanJobId: string, chat?: AnalyzerChat)
   const diagnoses = await runDiagnosisEngine(
     {
       brandName: job.brand.name,
+      industry: job.brand.industry,
       metrics,
       portrait,
       absentQuestionCount: absent.length,
